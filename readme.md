@@ -110,32 +110,43 @@ IMU型号：使用C板内置BMI088作为IMU\
         ```
 
 5. USB2CAN设置（可选）
-    1. 创建`.rules`文件:
+    1. 安装工具
+        ```bash
+        sudo apt update
+        sudo apt install can-utils
         ```
+
+    2. 创建`.rules`文件:
+        ```bash
         sudo touch /etc/udev/rules.d/99-can-up.rules
+    3. 在该文件中写入:
+        ***达妙usb转can专属***
+        ```bash
+        slcand -o -c -s8 -S1000000 /dev/ttyACM0 can0
+        sudo ifconfig can0 up 
         ```
-    2. 在该文件中写入:
-        ```
+         ***达妙usb转can专属***
+        ```bash
         ACTION=="add", KERNEL=="can0", RUN+="/sbin/ip link set can0 up type can bitrate 1000000"
         ACTION=="add", KERNEL=="can1", RUN+="/sbin/ip link set can1 up type can bitrate 1000000"
-
+        ```
 6. 使用GPU推理（可选）
-    ```
-    mkdir neo  
-    cd neo  
+         ```bash
+        
+        mkdir neo  
+        cd neo  
+        wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.13463.18/intel-igc-core_1.0.13463.18_amd64.deb  
+        wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.13463.18/intel-igc-opencl_1.0.13463.18_amd64.deb  
+        wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-level-zero-gpu-dbgsym_1.3.25812.14_amd64.ddeb  
+        wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-level-zero-gpu_1.3.25812.14_amd64.deb  
+        wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-opencl-icd-dbgsym_23.09.25812.14_amd64.ddeb  
+        wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-opencl-icd_23.09.25812.14_amd64.deb  
+        wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/libigdgmm12_22.3.0_amd64.deb  
+        wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/ww09.sum  
 
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.13463.18/intel-igc-core_1.0.13463.18_amd64.deb  
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.13463.18/intel-igc-opencl_1.0.13463.18_amd64.deb  
-    wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-level-zero-gpu-dbgsym_1.3.25812.14_amd64.ddeb  
-    wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-level-zero-gpu_1.3.25812.14_amd64.deb  
-    wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-opencl-icd-dbgsym_23.09.25812.14_amd64.ddeb  
-    wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/intel-opencl-icd_23.09.25812.14_amd64.deb  
-    wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/libigdgmm12_22.3.0_amd64.deb  
-    wget https://github.com/intel/compute-runtime/releases/download/23.09.25812.14/ww09.sum  
-
-    sha256sum -c ww09.sum  
-    sudo dpkg -i *.deb  
-    ```
+        sha256sum -c ww09.sum  
+        sudo dpkg -i *.deb  
+        ```
     注：如果使用 GPU 异步推理（async-infer），最高显示分辨率限制为 1920×1080 (24Hz)
 
 7. 串口设置

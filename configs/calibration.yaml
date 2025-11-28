@@ -4,14 +4,14 @@ center_distance_mm: 15.00
 
 R_gimbal2imubody: [1,0,0,0,1,0,0,0,1]
 
-# camera_name: "hikrobot"
-# exposure_ms: 3
-# gain: 10.0
-# vid_pid: "2bdf:0001"
-camera_name: "mindvision"
-exposure_ms: 8
-gamma: 0.6
-vid_pid: "f622:d13a"
+camera_name: "hikrobot"
+exposure_ms: 16
+gain: 10
+vid_pid: "2bdf:0001"
+# camera_name: "mindvision"
+# exposure_ms: 8
+# gamma: 0.6
+# vid_pid: "f622:d13a"
 
 #####-----cboard参数-----#####
 quaternion_canid: 0x411
@@ -19,9 +19,9 @@ bullet_speed_canid: 0x110
 send_canid: 0xff
 can_interface: "can0"
 
-com_port: "/dev/gimbal"
+com_port: "/dev/ttyACM0"
 
-# 重投影误差: 0.3959px
-camera_matrix: [1573.2790672555718, 0, 611.67072204843134, 0, 1574.2553165317206, 510.50473008416765, 0, 0, 1]
-distort_coeffs: [-0.10229534591559765, 0.20407070747797507, 0.0013223608023970506, 0.0012959373593525293, 0]
+# 重投影误差: 0.0413px
+camera_matrix: [2362.1894734109596, 0, 726.47159704988587, 0, 2360.9231571540317, 566.73520420693808, 0, 0, 1]
+distort_coeffs: [-0.088528978744720793, 0.42076176997059134, -0.0012810147148095768, 0.00042749741421824617, 0]
 

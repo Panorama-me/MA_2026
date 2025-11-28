@@ -243,6 +243,7 @@ bool Target::diverged() const
   auto r_ok = ekf_.x[8] > 0.05 && ekf_.x[8] < 0.5;
   auto l_ok = ekf_.x[8] + ekf_.x[9] > 0.05 && ekf_.x[8] + ekf_.x[9] < 0.5;
 
+
   if (r_ok && l_ok) return false;
 
   tools::logger()->debug("[Target] r={:.3f}, l={:.3f}", ekf_.x[8], ekf_.x[9]);
@@ -267,7 +268,8 @@ bool Target::convergened()
 Eigen::Vector3d Target::h_armor_xyz(const Eigen::VectorXd & x, int id) const
 {
   auto angle = tools::limit_rad(x[6] + id * 2 * CV_PI / armor_num_);
-  auto use_l_h = (armor_num_ == 4) && (id == 1 || id == 3);
+  auto use_l_h = ((armor_num_ == 4) && (id == 1 || id == 3));
+  auto use_h1_h2 = armor_num_ == 3;
 
   auto r = (use_l_h) ? x[8] + x[9] : x[8];
   auto armor_x = x[0] - r * std::cos(angle);
@@ -280,7 +282,8 @@ Eigen::Vector3d Target::h_armor_xyz(const Eigen::VectorXd & x, int id) const
 Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
 {
   auto angle = tools::limit_rad(x[6] + id * 2 * CV_PI / armor_num_);
-  auto use_l_h = (armor_num_ == 4) && (id == 1 || id == 3);
+  auto use_l_h = ((armor_num_ == 4) && (id == 1 || id == 3));
+  auto use_h1_h2 = armor_num_ == 3;
 
   auto r = (use_l_h) ? x[8] + x[9] : x[8];
   auto dx_da = r * std::sin(angle);

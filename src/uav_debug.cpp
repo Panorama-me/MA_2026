@@ -37,11 +37,10 @@ int main(int argc, char * argv[])
   tools::Recorder recorder;
 
   io::Camera camera(config_path);
-  io::CBoard cboard(config_path,"can");
-
-  auto_aim::Detector detector(config_path);
+  io::CBoard cboard(config_path,"serial");
   auto_aim::Solver solver(config_path);
   auto_aim::YOLO yolo(config_path);
+  // auto_aim::Detector detector(config_path, true);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
   auto_aim::Shooter shooter(config_path);
@@ -153,7 +152,7 @@ int main(int argc, char * argv[])
 
     // 云台响应情况
     data["gimbal_yaw"] = ypr[0] * 57.3;
-    data["gimbal_pitch"] = ypr[1] * 57.3;
+    data["gimbal_pitch"] = -ypr[1] * 57.3;
     data["bullet_speed"] = cboard.bullet_speed;
     if (command.control) {
       data["cmd_yaw"] = command.yaw;

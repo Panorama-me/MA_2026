@@ -12,9 +12,9 @@ CBoard::CBoard(const std::string & config_path , const std::string& mode_str)
   shoot_mode(ShootMode::left_shoot),
   bullet_speed(0),
   queue_(5000),
-   current_mode_(mode_str),
-   can_(read_yaml(config_path), std::bind(&CBoard::callback, this, std::placeholders::_1))
-// 注意: callback的运行会早于Cboard构造函数的完成
+   current_mode_(mode_str)
+  //  can_(read_yaml(config_path),
+  //        std::bind(&CBoard::callback, this, std::placeholders::_1))
 {
   // 1. 解析模式字符串，转换为CommMode枚举
     if (current_mode_ == "can") {
@@ -91,7 +91,7 @@ void CBoard::send(Command command)
     frame.data[6] = (int16_t)(command.horizon_distance * 1e2) >> 8;
     frame.data[7] = (int16_t)(command.horizon_distance * 1e2);
     try {
-      can_.write(&frame);
+      // can_.write(&frame);
     } catch (const std::exception & e) {
       tools::logger()->warn("{}", e.what());
     }
@@ -100,11 +100,23 @@ void CBoard::send(Command command)
     tx_data_.mode = command.control ? (command.shoot ? 2 : 1) : 0;
     tx_data_.yaw = command.yaw;
     tx_data_.pitch = command.pitch;
-    tx_data_.crc16 = tools::sum(
+    tx_data_.crc16 = tools::get_crc16(
       reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
   
     try {
-      serial_.write(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+      // 直接打印tx_data_的十六进制原始数据，不封装函数
+const uint8_t* tx_raw = reinterpret_cast<const uint8_t*>(&tx_data_);
+std::stringstream tx_ss;
+tx_ss << "[Gimbal] TX raw data (Hex): ";
+for (size_t i = 0; i < sizeof(tx_data_); ++i) {
+    tx_ss << "0x" << std::hex << std::setw(2) << std::setfill('0') 
+          << static_cast<int>(tx_raw[i]) << " ";
+}
+tools::logger()->debug(tx_ss.str());
+
+// 发送数据
+serial_.write(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+
     } catch (const std::exception & e) {
       tools::logger()->warn("[CBoard] Failed to write serial: {}", e.what());
     }
@@ -227,34 +239,43 @@ void CBoard::read_thread()
       continue;
     }
 
-    if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
-      tools::logger()->debug("[Gimbal] CRC16 check failed.");
-      continue;
-    }
+    // if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
+    //   tools::logger()->debug("[Gimbal] CRC16 check failed.");
+    //   continue;
+    // }
 
-//     if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
-//     tools::logger()->debug("[Gimbal] CRC16 check failed.");
+if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
+    tools::logger()->debug("[Gimbal] CRC16 check failed.");
     
-//     // -------------------------- 新增：打印原始接收数据 --------------------------
-//     // 1. 将 rx_data_ 转为 uint8_t*，获取原始字节流
-//     const uint8_t* raw_data = reinterpret_cast<const uint8_t*>(&rx_data_);
-//     // 2. 获取接收数据的总长度（rx_data_ 结构体的字节数，即实际接收的字节数）
-//     const size_t data_len = sizeof(rx_data_);
+    // -------------------------- 新增：打印原始接收数据 --------------------------
+    // const uint8_t* raw_data = reinterpret_cast<const uint8_t*>(&rx_data_);
+    // const size_t data_len = sizeof(rx_data_);
     
-//     // 3. 拼接原始数据的十六进制字符串（避免多次日志调用，更高效）
-//     std::stringstream raw_data_str;
-//     raw_data_str << "[Gimbal] Received raw data (Hex): ";
-//     for (size_t i = 0; i < data_len; ++i) {
-//         // 以 "0xXX " 格式拼接，不足两位补0（如 0x0A 而非 0xA）
-//         raw_data_str << "0x" << std::hex << std::setw(2) << std::setfill('0') 
-//                     << static_cast<int>(raw_data[i]) << " ";
-//     }
-//     // 4. 打印原始数据（用 debug 级别，和原日志级别一致）
-//     tools::logger()->debug(raw_data_str.str());
-//     // --------------------------------------------------------------------------
+    // std::stringstream raw_data_str;
+    // raw_data_str << "[Gimbal] Received raw data (Hex): ";
+    // for (size_t i = 0; i < data_len; ++i) {
+    //     raw_data_str << "0x" << std::hex << std::setw(2) << std::setfill('0') 
+    //                 << static_cast<int>(raw_data[i]) << " ";
+    // }
+    // tools::logger()->debug(raw_data_str.str());
+    // // --------------------------------------------------------------------------
+
+    // // -------------------------- 新增：打印期望的CRC16值 --------------------------
+    // // 1. 计算当前接收数据的CRC16（使用与校验相同的算法）
+    // uint16_t expected_crc = tools::get_crc16(reinterpret_cast<uint8_t*>(&rx_data_), data_len - 2); 
+    // // 注：假设CRC字段是最后2字节，计算时需排除；若包含则直接传data_len
     
-//     continue; // 校验失败，跳过后续处理
-// }
+    // // 2. 提取接收数据中实际携带的CRC值（假设最后2字节是CRC）
+    // uint16_t received_crc = (static_cast<uint16_t>(raw_data[data_len - 2]) << 8) | raw_data[data_len - 1];
+    // // 若CRC是小端序则调整：received_crc = (static_cast<uint16_t>(raw_data[data_len - 1]) << 8) | raw_data[data_len - 2];
+    
+    // // 3. 打印期望CRC与实际接收的CRC
+    // tools::logger()->debug("[Gimbal] Expected CRC16: 0x{:04X}, Received CRC16: 0x{:04X}", 
+    //                        expected_crc, received_crc);
+    // --------------------------------------------------------------------------
+    
+    continue; // 校验失败，跳过后续处理
+}
 
 
     error_count = 0;

@@ -319,4 +319,6 @@ void YOLO11_BUFF::save(const std::string & programName, const cv::Mat & image)
   const std::filesystem::path savePath = saveDir / (programName + ".jpg");
   cv::imwrite(savePath.string(), image);
 }
-}  // namespace auto_buff
+}
+ // namespace auto_buff
+
