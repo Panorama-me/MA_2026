@@ -21,7 +21,7 @@ const std::string keys =
   "{config-path c  | configs/uav.yaml | yaml配置文件的路径}"
   "{start-index s  | 0                 | 视频起始帧下标    }"
   "{end-index e    | 0                 | 视频结束帧下标    }"
-  "{@input-path    | assets/demo/1  | avi和txt文件的路径}";
+  "{@input-path    | assets/demo/demo  | avi和txt文件的路径}";
 
 int main(int argc, char * argv[])
 {
@@ -45,7 +45,7 @@ int main(int argc, char * argv[])
   std::ifstream text(text_path);
 
   auto_aim::YOLO yolo(config_path);
-  // auto_aim::Detector detector(config_path, true);
+  auto_aim::Detector detector(config_path, true);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);

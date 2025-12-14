@@ -3,7 +3,6 @@
 #include <thread>
 
 #include "io/camera.hpp"
-#include "io/dm_imu/dm_imu.hpp"
 #include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/detector.hpp"
 #include "tasks/auto_aim/shooter.hpp"
@@ -37,7 +36,7 @@ int main(int argc, char * argv[])
   tools::Recorder recorder;
 
   io::Camera camera(config_path);
-  io::CBoard cboard(config_path,"can");
+  io::CBoard cboard(config_path,"serial");
 
   auto_aim::Detector detector(config_path);
   auto_aim::Solver solver(config_path);
@@ -77,7 +76,7 @@ int main(int argc, char * argv[])
     auto command = aimer.aim(targets, t, cboard.bullet_speed);
 
     command.shoot = shooter.shoot(command, aimer, targets, ypr);
-
+    
     cboard.send(command);
 
     /// debug

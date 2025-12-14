@@ -7,8 +7,6 @@
 #include <chrono>
 #include <cmath>
 #include <vector>
-
-#include "../auto_aim/planner/planner.hpp"
 #include "buff_target.hpp"
 #include "buff_type.hpp"
 #include "io/command.hpp"
@@ -23,10 +21,6 @@ public:
 
   io::Command aim(
     Target & target, std::chrono::steady_clock::time_point & timestamp, double bullet_speed,
-    bool to_now = true);
-
-  auto_aim::Plan mpc_aim(
-    Target & target, std::chrono::steady_clock::time_point & timestamp, io::GimbalState gs,
     bool to_now = true);
 
   double angle;      ///

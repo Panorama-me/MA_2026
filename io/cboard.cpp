@@ -12,9 +12,9 @@ CBoard::CBoard(const std::string & config_path , const std::string& mode_str)
   shoot_mode(ShootMode::left_shoot),
   bullet_speed(0),
   queue_(5000),
-   current_mode_(mode_str),
-   can_(read_yaml(config_path), std::bind(&CBoard::callback, this, std::placeholders::_1))
-// 注意: callback的运行会早于Cboard构造函数的完成
+    current_mode_(mode_str)
+  //  can_(read_yaml(config_path),
+  //        std::bind(&CBoard::callback, this, std::placeholders::_1))
 {
   // 1. 解析模式字符串，转换为CommMode枚举
     if (current_mode_ == "can") {
@@ -91,7 +91,7 @@ void CBoard::send(Command command)
     frame.data[6] = (int16_t)(command.horizon_distance * 1e2) >> 8;
     frame.data[7] = (int16_t)(command.horizon_distance * 1e2);
     try {
-      can_.write(&frame);
+      // can_.write(&frame);
     } catch (const std::exception & e) {
       tools::logger()->warn("{}", e.what());
     }
@@ -100,9 +100,9 @@ void CBoard::send(Command command)
     tx_data_.mode = command.control ? (command.shoot ? 2 : 1) : 0;
     tx_data_.yaw = command.yaw;
     tx_data_.pitch = command.pitch;
-    tx_data_.crc16 = tools::sum(
+    tx_data_.crc16 = tools::get_crc16(
       reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
-  
+      printf("%d\n",tx_data_.crc16);
     try {
       serial_.write(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
     } catch (const std::exception & e) {
@@ -228,7 +228,7 @@ void CBoard::read_thread()
     }
 
     if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
-      tools::logger()->debug("[Gimbal] CRC16 check failed.");
+      // tools::logger()->debug("[Gimbal] CRC16 check failed.");
       continue;
     }
 
@@ -297,7 +297,7 @@ void CBoard::read_thread()
         mode_ = GimbalMode::AUTO_AIM;
         break;
       case 2:
-        mode_ = GimbalMode::SMALL_BUFF;
+        mode_ = GimbalMode::AUTO_AIM;
         break;
       case 3:
         mode_ = GimbalMode::BIG_BUFF;

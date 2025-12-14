@@ -10,14 +10,14 @@ yolov8_model_path: assets/yolov8.xml
 yolov5_model_path: assets/yolov5.xml
 device: CPU
 min_confidence: 0.8
-use_traditional: true
+use_traditional: false
 
 #####-----ROI-----#####
 roi: 
   x: 420
-  y: 50
-  width: 600
-  height: 600
+  y: 150
+  width: 700
+  height: 700
 
 use_roi: false
 
@@ -28,8 +28,8 @@ use_roi: false
 # vid_pid: "f622:d132"
 
 camera_name: "hikrobot"
-exposure_ms: 2
-gain: 16
+exposure_ms: 13
+gain: 10
 vid_pid: "2bdf:0001"
 
 #####-----USB相机参数-----#####
@@ -65,7 +65,8 @@ bullet_speed_canid: 0x110
 send_canid: 0xff
 can_interface: "can0"
 
-com_port: "/dev/gimbal"
+# com_port: "/dev/gimbal"
+com_port: "/dev/ttyACM0"
 
 #####-----tracker参数-----###
 min_detect_count: 5
@@ -73,8 +74,8 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 150
 
 #####-----aimer参数-----#####
-yaw_offset: 0 # degree -2.5 注意下面全是角度
-pitch_offset: -0.5 # degree 2
+yaw_offset: 2 # degree -2.5 注意下面全是角度
+pitch_offset: -2 # degree 2
 comming_angle: 70 # degree
 leaving_angle: 20 # degree
 min_spin_speed: 2 # rad/s
@@ -89,18 +90,19 @@ mode: 2
 first_tolerance: 3 # 近距离射击容差，degree
 second_tolerance: 2 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
-auto_fire: true # 是否由自瞄控制射击
+auto_fire: false # 是否由自瞄控制射击
 
 
-# 重投影误差: 0.3959px
-camera_matrix: [1573.2790672555718, 0, 611.67072204843134, 0, 1574.2553165317206, 510.50473008416765, 0, 0, 1]
-distort_coeffs: [-0.10229534591559765, 0.20407070747797507, 0.0013223608023970506, 0.0012959373593525293, 0]
+# 重投影误差: 0.0413px
+camera_matrix: [2362.1894734109596, 0, 726.47159704988587, 0, 2360.9231571540317, 566.73520420693808, 0, 0, 1]
+distort_coeffs: [-0.088528978744720793, 0.42076176997059134, -0.0012810147148095768, 0.00042749741421824617, 0]
 
-# # 相机同理想情况的偏角: yaw1.61 pitch1.85 roll-0.11 degree
-# # 标定板到世界坐标系原点的水平距离: 1.56 m
-# # 标定板同竖直摆放时的偏角: yaw-104.82 pitch17.73 roll-2.10 degree
-R_camera2gimbal: [-0.028163855385139207, 0.032215284790330714, 0.9990840668711134, -0.99960154869059248, -0.0027892163884449513, -0.028088505252288905, 0.0018817824567139538, -0.99947706111637036, 0.032281003654925061]
-t_camera2gimbal: [0.025157261344821845, 0.0056073055465804336, 0.071348073629900199]
+# 相机同理想情况的偏角: yaw-0.39 pitch1.37 roll0.13 degree
+# 标定板到世界坐标系原点的水平距离: 2.28 m
+# 标定板同竖直摆放时的偏角: yaw-28.68 pitch9.14 roll0.38 degree
+R_camera2gimbal: [0.0069216603541662307, 0.023913242037165359, 0.99969007571007407, -0.99997332862403121, 0.0024957185287705404, 0.006863922318976293, -0.0023308064092396508, -0.99971092233920156, 0.023929878754092099]
+t_camera2gimbal: [0.14087548826365323, -0.03900096527306704, 0.037782243093329289]
+
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
 # 相机同理想情况的偏角: yaw0.33 pitch1.08 roll-0.63 degree

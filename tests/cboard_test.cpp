@@ -25,7 +25,7 @@ int main(int argc, char * argv[])
 
   tools::Exiter exiter;
 
-  io::CBoard cboard(config_path,"serial");
+  io::CBoard cboard(config_path,"can");
 
   while (!exiter.exit()) {
     auto timestamp = std::chrono::steady_clock::now();

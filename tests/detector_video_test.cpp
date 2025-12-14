@@ -11,10 +11,10 @@
 
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明 }"
-  "{config-path c  | configs/sentry.yaml    | yaml配置文件的路径}"
+  "{config-path c  | configs/uav.yaml    | yaml配置文件的路径}"
   "{start-index s  | 0                      | 视频起始帧下标    }"
   "{end-index e    | 0                      | 视频结束帧下标    }"
-  "{@video_path    |                        | avi路径}"
+  "{@video_path    |  assets/demo/demo                | avi路径}"
   "{tradition t    |  false                 | 是否使用传统方法识别}";
 
 int main(int argc, char * argv[])
@@ -36,8 +36,8 @@ int main(int argc, char * argv[])
 
   cv::VideoCapture video(video_path);
 
-  auto_aim::Detector detector(config_path);
-  auto_aim::YOLO yolo(config_path);
+  auto_aim::Detector detector(config_path,true);
+  auto_aim::YOLO yolo(config_path,true);
 
   video.set(cv::CAP_PROP_POS_FRAMES, start_index);
 
