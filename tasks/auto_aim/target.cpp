@@ -272,7 +272,7 @@ Eigen::Vector3d Target::h_armor_xyz(const Eigen::VectorXd & x, int id) const
 {
   auto angle = tools::limit_rad(x[6] + id * 2 * CV_PI / armor_num_);
   auto use_l_h = ((armor_num_ == 4) && (id == 1 || id == 3));
-  auto outpost = ((armor_num_ == 3) && armor_type == ArmorName::outpost);
+  auto outpost = ((armor_num_ == 3) && name == ArmorName::outpost);
   auto r = (use_l_h) ? x[8] + x[9] : x[8];
 
   auto armor_x = x[0] - r * std::cos(angle);
@@ -286,7 +286,7 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
 {
   auto angle = tools::limit_rad(x[6] + id * 2 * CV_PI / armor_num_);
   auto use_l_h = ((armor_num_ == 4) && (id == 1 || id == 3));
-  auto outpost = ((armor_num_ == 3) &&armor_type == ArmorName::outpost);
+  auto outpost = ((armor_num_ == 3) && name == ArmorName::outpost);
   auto r = (use_l_h) ? x[8] + x[9] : x[8];
   auto dx_da = r * std::sin(angle);
   auto dy_da = -r * std::cos(angle);
