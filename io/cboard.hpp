@@ -83,6 +83,11 @@ private:
   GimbalMode mode_ = GimbalMode::IDLE;
   GimbalState state_;
 
+  bool last_control_state_ = false;          
+  VisionToGimbal last_control_data_;            
+  std::chrono::steady_clock::time_point control_off_time_; 
+  bool is_holding_control_data_ = false;     
+
   bool read(uint8_t * buffer, size_t size);
   void read_thread();
   void reconnect();

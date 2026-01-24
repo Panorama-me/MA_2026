@@ -97,17 +97,81 @@ void CBoard::send(Command command)
     }
   }
   else if(current_mode_ == "serial") {
-    tx_data_.mode = command.control ? (command.shoot ? 2 : 1) : 0;
-    tx_data_.yaw = command.yaw;
-    tx_data_.pitch = command.pitch;
-    tx_data_.crc16 = tools::get_crc16(
-      reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
-      printf("%d\n",tx_data_.crc16);
-    try {
-      serial_.write(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
-    } catch (const std::exception & e) {
-      tools::logger()->warn("[CBoard] Failed to write serial: {}", e.what());
-    }
+
+      bool current_control = command.control;
+      auto now = std::chrono::steady_clock::now();
+      
+      if (last_control_state_ && !current_control && !is_holding_control_data_) {
+        is_holding_control_data_ = true;
+        control_off_time_ = now; 
+
+      }
+
+      if (current_control) {
+        if (is_holding_control_data_) {
+
+        }
+        is_holding_control_data_ = false;
+        last_control_data_.mode = 1;
+        last_control_data_.yaw = command.yaw;
+        last_control_data_.pitch = command.pitch;
+        last_control_data_.head[0] = 'M';
+        last_control_data_.head[1] = 'A';
+        last_control_data_.crc16 = tools::get_crc16(
+          reinterpret_cast<uint8_t*>(&last_control_data_), 
+          sizeof(last_control_data_) - sizeof(last_control_data_.crc16)
+        );
+      }
+
+
+      if (is_holding_control_data_) {
+        std::chrono::duration<double> elapsed = now - control_off_time_;
+        
+        if (elapsed.count() < 3.0) {
+          try {
+            serial_.write(reinterpret_cast<uint8_t*>(&last_control_data_), sizeof(last_control_data_));
+          } catch (const std::exception &e) {
+            tools::logger()->warn("[heaven] Failed to write hold data: {}", e.what());
+            std::cout << "[Hseven Send] 保持发送失败: " << e.what() << std::endl;
+          }
+        }else {
+          is_holding_control_data_ = false;
+          tx_data_.mode = 0;
+          tx_data_.yaw = command.yaw;
+          tx_data_.pitch = command.pitch;
+          tx_data_.head[0] = 'M';
+          tx_data_.head[1] = 'A';
+          tx_data_.crc16 = tools::get_crc16(
+            reinterpret_cast<uint8_t*>(&tx_data_), 
+            sizeof(tx_data_) - sizeof(tx_data_.crc16)
+          );
+          try {
+            serial_.write(reinterpret_cast<uint8_t*>(&tx_data_), sizeof(tx_data_));
+          } catch (const std::exception &e) {
+            tools::logger()->warn("[heaven] Failed to write control=0 data: {}", e.what());
+            std::cout << "[Hseven Send] 发送control=0数据失败: " << e.what() << std::endl;
+          }
+        }
+      } else {
+        tx_data_.mode = current_control ? (command.shoot ? 2 : 1) : 0;
+        tx_data_.yaw = command.yaw;
+        tx_data_.pitch = command.pitch;
+        tx_data_.head[0] = 'M';
+        tx_data_.head[1] = 'A';
+        tx_data_.crc16 = tools::get_crc16(
+          reinterpret_cast<uint8_t*>(&tx_data_), 
+          sizeof(tx_data_) - sizeof(tx_data_.crc16)
+        );
+        try {
+          serial_.write(reinterpret_cast<uint8_t*>(&tx_data_), sizeof(tx_data_));
+        } catch (const std::exception &e) {
+          tools::logger()->warn("[heaven] Failed to write normal data: {}", e.what());
+          std::cout << "[Hseven Send] 正常发送失败: " << e.what() << std::endl;
+        }
+      }
+
+      last_control_state_ = current_control;
+
   }
   
 }
