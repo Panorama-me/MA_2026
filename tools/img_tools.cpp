@@ -21,6 +21,13 @@ void draw_points(
   draw_points(img, int_points, color, thickness);
 }
 
+void draw_points(
+  cv::Mat & img, const std::array<cv::Point2f, 4> & points, const cv::Scalar & color, int thickness)
+{
+  std::vector<cv::Point> int_points(points.begin(), points.end());
+  draw_points(img, int_points, color, thickness);
+}
+
 void draw_text(
   cv::Mat & img, const std::string & text, const cv::Point & point, const cv::Scalar & color,
   double font_scale, int thickness)

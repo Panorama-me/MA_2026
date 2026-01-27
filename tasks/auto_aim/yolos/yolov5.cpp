@@ -106,14 +106,14 @@ std::list<Armor> YOLOV5::parse(
   std::vector<int> color_ids, num_ids;
   std::vector<float> confidences;
   std::vector<cv::Rect> boxes;
-  std::vector<std::vector<cv::Point2f>> armors_key_points;
+  std::vector<std::array<cv::Point2f, 4>> armors_key_points;
   for (int r = 0; r < output.rows; r++) {
     double score = output.at<float>(r, 8);
     score = sigmoid(score);
 
     if (score < score_threshold_) continue;
 
-    std::vector<cv::Point2f> armor_key_points;
+    std::array<cv::Point2f, 4> armor_key_points;
 
     //颜色和类别独热向量
     cv::Mat color_scores = output.row(r).colRange(9, 13);     //color
@@ -126,19 +126,15 @@ std::list<Armor> YOLOV5::parse(
     _class_id = class_id.x;
     _color_id = color_id.x;
 
-    armor_key_points.push_back(
-      cv::Point2f(output.at<float>(r, 0) / scale, output.at<float>(r, 1) / scale));
-    armor_key_points.push_back(
-      cv::Point2f(output.at<float>(r, 6) / scale, output.at<float>(r, 7) / scale));
-    armor_key_points.push_back(
-      cv::Point2f(output.at<float>(r, 4) / scale, output.at<float>(r, 5) / scale));
-    armor_key_points.push_back(
-      cv::Point2f(output.at<float>(r, 2) / scale, output.at<float>(r, 3) / scale));
+    armor_key_points[0] = cv::Point2f(output.at<float>(r, 0) / scale, output.at<float>(r, 1) / scale);
+    armor_key_points[1] = cv::Point2f(output.at<float>(r, 6) / scale, output.at<float>(r, 7) / scale);
+    armor_key_points[2] = cv::Point2f(output.at<float>(r, 4) / scale, output.at<float>(r, 5) / scale);
+    armor_key_points[3] = cv::Point2f(output.at<float>(r, 2) / scale, output.at<float>(r, 3) / scale);
 
     float min_x = armor_key_points[0].x;
     float max_x = armor_key_points[0].x;
     float min_y = armor_key_points[0].y;
-    float max_y = armor_key_points[0].y;
+    float max_y = armor_key_points[0].y; 
 
     for (int i = 1; i < armor_key_points.size(); i++) {
       if (armor_key_points[i].x < min_x) min_x = armor_key_points[i].x;
@@ -241,7 +237,7 @@ void YOLOV5::draw_detections(
     cv::rectangle(detection, roi_, green, 2);
   }
   cv::resize(detection, detection, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
-  // cv::imshow("detection", detection);
+  cv::imshow("detection", detection);
 }
 
 void YOLOV5::save(const Armor & armor) const

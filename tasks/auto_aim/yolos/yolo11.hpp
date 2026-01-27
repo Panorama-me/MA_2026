@@ -51,7 +51,7 @@ private:
 
   void save(const Armor & armor) const;
   void draw_detections(const cv::Mat & img, const std::list<Armor> & armors, int frame_count) const;
-  void sort_keypoints(std::vector<cv::Point2f> & keypoints);
+  void sort_keypoints(std::array<cv::Point2f, 4> & keypoints);
 };
 
 }  // namespace auto_aim

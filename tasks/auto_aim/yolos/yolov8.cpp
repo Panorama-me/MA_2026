@@ -112,13 +112,13 @@ std::list<Armor> YOLOV8::parse(
   std::vector<int> ids;
   std::vector<float> confidences;
   std::vector<cv::Rect> boxes;
-  std::vector<std::vector<cv::Point2f>> armors_key_points;
+  std::vector<std::array<cv::Point2f, 4>> armors_key_points;
   for (int r = 0; r < output.rows; r++) {
     auto xywh = output.row(r).colRange(0, 4);
     auto scores = output.row(r).colRange(4, 4 + class_num_);
     auto one_key_points = output.row(r).colRange(4 + class_num_, 14);
 
-    std::vector<cv::Point2f> armor_key_points;
+    std::array<cv::Point2f, 4> armor_key_points;
 
     double score;
     cv::Point max_point;
@@ -139,7 +139,7 @@ std::list<Armor> YOLOV8::parse(
       float x = one_key_points.at<float>(0, i * 2 + 0) / scale;
       float y = one_key_points.at<float>(0, i * 2 + 1) / scale;
       cv::Point2f kp = {x, y};
-      armor_key_points.push_back(kp);
+      armor_key_points[i] = kp;
     }
     ids.emplace_back(max_point.x);
     confidences.emplace_back(score);
@@ -293,7 +293,7 @@ void YOLOV8::draw_detections(
   // cv::imshow("detection", detection);
 }
 
-void YOLOV8::sort_keypoints(std::vector<cv::Point2f> & keypoints)
+void YOLOV8::sort_keypoints(std::array<cv::Point2f, 4> & keypoints)
 {
   if (keypoints.size() != 4) {
     std::cout << "beyond 4!!" << std::endl;

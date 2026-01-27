@@ -37,10 +37,10 @@ Armor::Armor(const Lightbar & left, const Lightbar & right)
   color = left.color;
   center = (left.center + right.center) / 2;
 
-  points.emplace_back(left.top);
-  points.emplace_back(right.top);
-  points.emplace_back(right.bottom);
-  points.emplace_back(left.bottom);
+  points[0] = left.top;
+  points[1] = right.top;
+  points[2] = right.bottom;
+  points[3] = left.bottom;
 
   auto left2right = right.center - left.center;
   auto width = cv::norm(left2right);
@@ -57,7 +57,7 @@ Armor::Armor(const Lightbar & left, const Lightbar & right)
 
 //神经网络构造函数
 Armor::Armor(
-  int class_id, float confidence, const cv::Rect & box, std::vector<cv::Point2f> armor_keypoints)
+  int class_id, float confidence, const cv::Rect & box, std::array<cv::Point2f, 4> armor_keypoints)
 : class_id(class_id), confidence(confidence), box(box), points(armor_keypoints)
 {
   center = (armor_keypoints[0] + armor_keypoints[1] + armor_keypoints[2] + armor_keypoints[3]) / 4;
@@ -98,7 +98,7 @@ Armor::Armor(
 
 //神经网络ROI构造函数
 Armor::Armor(
-  int class_id, float confidence, const cv::Rect & box, std::vector<cv::Point2f> armor_keypoints,
+  int class_id, float confidence, const cv::Rect & box, std::array<cv::Point2f, 4> armor_keypoints,
   cv::Point2f offset)
 : class_id(class_id), confidence(confidence), box(box), points(armor_keypoints)
 {
@@ -147,7 +147,7 @@ Armor::Armor(
 // YOLOV5构造函数
 Armor::Armor(
   int color_id, int num_id, float confidence, const cv::Rect & box,
-  std::vector<cv::Point2f> armor_keypoints)
+  std::array<cv::Point2f, 4> armor_keypoints)
 : confidence(confidence), box(box), points(armor_keypoints)
 {
   center = (armor_keypoints[0] + armor_keypoints[1] + armor_keypoints[2] + armor_keypoints[3]) / 4;
@@ -182,7 +182,7 @@ Armor::Armor(
 // YOLOV5+ROI构造函数
 Armor::Armor(
   int color_id, int num_id, float confidence, const cv::Rect & box,
-  std::vector<cv::Point2f> armor_keypoints, cv::Point2f offset)
+  std::array<cv::Point2f, 4> armor_keypoints, cv::Point2f offset)
 : confidence(confidence), box(box), points(armor_keypoints)
 {
   std::transform(
